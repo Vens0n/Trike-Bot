@@ -1,6 +1,9 @@
 console.clear();
 console.debug(`Booting up…`);
 
+const { QuickDB } = require("quick.db");
+const db = new QuickDB()
+
 const Discord = require('discord.js');
 const { Client, Collection, Intents } = Discord;
 const handler = require("./src/handlers/index");
@@ -54,3 +57,24 @@ process.on("unhandledRejection", (reason, promise) => {
 // Login Discord Bot Token
 client.login(process.env.TOKEN);
 
+
+
+
+
+// HIVEMIND
+
+
+
+
+client.on("messageCreate", async message => {
+    if(message.channel.id != "975508455563595846") return
+    if(message.content != "👍") return
+    if(!message.member.roles.cache.some(role => role.id === '1009675922103869490')) return
+    const mentioned = message.mentions.members.first()
+    if(!mentioned) return
+    await mentioned.roles.add("975851370777292811")
+    console.log(message.reference.messageId)
+    const channel = client.channels.cache.get(`975508455563595846`);
+    const themessage = await channel.messages.fetch(message.reference.messageId);
+    await themessage.react("👍")
+  })
