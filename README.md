@@ -1,4 +1,4 @@
-# Trike Bot![trikebotpfp](https://images-ext-1.discordapp.net/external/vJIyVgNZP3SXJdJ6VMnpxynrRJIrabbWg33IjLLwXaE/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/985718921275510814/ee46db27de44ea59c67c128b8fcfe934.webp?width=25&height=25)
+# Trike Bot ![trikebotpfp](https://images-ext-1.discordapp.net/external/vJIyVgNZP3SXJdJ6VMnpxynrRJIrabbWg33IjLLwXaE/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/985718921275510814/ee46db27de44ea59c67c128b8fcfe934.webp?width=25&height=25)
 # [Discord Server](https://discord.gg/ErhUfrjCvb)
 
 **Required** Packages
