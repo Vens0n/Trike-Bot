@@ -41,7 +41,7 @@ module.exports = {
 
 		const newbuttons = new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId("THECOINHEADID").setEmoji("🌕").setStyle(ButtonStyle.Secondary)).addComponents(new ButtonBuilder().setCustomId("THECOINTAILSID").setEmoji("🌑").setStyle(ButtonStyle.Secondary));
 
-		var keepthismsg = await interaction.reply({ embeds: [embed], components: [newbuttons], withResponse: true });
+		var keepthismsg = await interaction.reply({ embeds: [embed], components: [newbuttons] });
 
 		const collectorFilter = (i) => i.user.id === interaction.user.id;
 		//console.log(keepthismsg.awaitMessageComponent());
@@ -100,7 +100,10 @@ module.exports = {
 				}
 			}
 			moneyDB.set(`wallet_${interaction.user.id}`, userbal);
+			await client.cooldownDB.set(`cooldown_${module.exports.name}_${interaction.user.id}`, Date.now() + module.exports.coolDownTime * 1000);
+
 		} catch (err) {
+			console.error("Error in coinflip command:", err);
 			await interaction.editReply({ content: "Confirmation not received within 10 seconds, cancelling", embeds: [], components: [] });
 		}
 	},

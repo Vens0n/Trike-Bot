@@ -1,3 +1,6 @@
+const { QuickDB } = require("quick.db");
+const cooldownDB = new QuickDB({ filePath: "DB/cooldowns.sqlite" });
+
 module.exports = {
 	name: "interactionCreate",
 
@@ -28,18 +31,22 @@ module.exports = {
 				let isOwner = client.config.ownerIDs.includes(interaction.user.id);
 				if (command.ownerOnly && !isOwner) return;
 
-				// Cooldown
-				if (command.coolDownTime) {
-					const cooldownKey = `${interaction.user.id}-${interaction.commandName}`;
-					const cooldownEnd = client.cooldowns.get(cooldownKey);
-					if (cooldownEnd && cooldownEnd > Date.now()) {
-						const timeLeft = Math.ceil((cooldownEnd - Date.now()) / 1000);
-						return interaction.reply({
-							content: `You're on cooldown. Try again <t:${Math.floor(Date.now() / 1000) + timeLeft}:R>`,
-							ephemeral: true
-						});
-					}
+
+
+
+				const userKey = `cooldown_${command.name}_${interaction.user.id}`;
+				const now = Date.now();
+				const cooldownUntil = await cooldownDB.get(userKey);
+				console.log(`[Debug] Cooldown for ${command.name} by ${interaction.user.id}:`, cooldownUntil, now);
+				if (cooldownUntil && cooldownUntil > now) {
+					return interaction.reply({
+						content: `⏳ You're on cooldown! Try again <t:${(cooldownUntil / 1000).toFixed(0)}:R> .`,
+						ephemeral: true
+					});
 				}
+
+
+
 
 				const args = interaction.options.data.map(option => option.value);
 

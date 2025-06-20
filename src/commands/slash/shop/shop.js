@@ -26,7 +26,6 @@ module.exports = {
         var embed = new EmbedBuilder()
             .setTitle("Shop")
             .setDescription(`Welcome to the shop! Here are the available items:`) //\n
-                //${shopitems.slice(0, 6).map(item => `${item.emoji} **${item.name}** - ${item.description} (Price: ${(item.price * deal).toFixed(2)} coins)`).join("\n")}`)
             .addFields(
                 pageItems.map(item => ({
                     name: `${item.emoji}-  **${item.name}**`,
@@ -121,16 +120,15 @@ module.exports = {
                     pass = false
                     }
                 }
-                // Deduct the money from the user's wallet
-                //await moneyDB.subtract(`wallet_${interaction.user.id}`, itemPrice);
-                // Add the item to the user's inventory
+                
 
 				console.log(`${interaction.user.username} selected to buy: ${chosenItem}`);
 				
                 if (pass === false) return;
 
                 if (amountofitemalready === 0) {
-                    await inventoryDB.set(`inventory_${interaction.user.id}.${item.name}`, {
+                    console.log("YUou dont yeyt own this")
+                    inventory.push({
                         name: item.name,
                         emoji: item.emoji,
                         amount: 1,
@@ -138,14 +136,17 @@ module.exports = {
                         price: item.price,
                         extradata: item.extradata
                     });
+                    
                 } else {
-                    await inventoryDB.set(`inventory_${interaction.user.id}.${item.name}.amount`, amountofitemalready + 1);
+                    inventory[item.name].amount += 1;
                 }
+                await inventoryDB.set(`inventory_${interaction.user.id}`, inventory);
+                await moneyDB.set(`wallet_${interaction.user.id}`, wallet - itemPrice);
 
                 const embeddedError = new EmbedBuilder()
                     .setTitle("Shop")
                     .setDescription(`Yay! You bought **${item.name}** for $${itemPrice.toFixed(2)}!\n\nYou now have $${(wallet - itemPrice).toFixed(2)} left in your wallet.\nYou own ${amountofitemalready + 1} of this item.`)
-                    .setFooter({ text: client.config.footerText, iconURL: client.user.displayAvatarURL() })
+			        .setFooter({ text: client.config.embedfooterText, iconURL: interaction.user.displayAvatarURL() })
                     .setColor(client.config.embedColor());
                 return interaction.editReply({ embeds: [embeddedError], components: [] }); 
 			}

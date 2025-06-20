@@ -8,9 +8,9 @@ module.exports = {
 	name: "work",
 	description: "You don't have a j*b, but you can surly find something do to.",
 	type: 1,
-	coolDownTime: 60 * 60,
+	coolDownTime: 2 * 60 * 60, // 16 hours in seconds
 	execute: async (client, interaction, args) => {
-		const runAt = Date.now() + 2 * 60 * 60 * 1000;
+		const runAt = Date.now() + 16 * 60 * 60 * 1000;
 		const taskRemoved = await client.config.removeUserTaskIfExists("work", "reminder", interaction.user.id);
 		if (taskRemoved) {
 			console.log("Previous task found and removed.");
@@ -109,6 +109,8 @@ module.exports = {
 			return;
 		} else {
 			const jobName = job.name;
+			console.log(`cooldown_${module.exports.name}_${interaction.user.id}`)
+			await client.cooldownDB.set(`cooldown_${module.exports.name}_${interaction.user.id}`, Date.now() + module.exports.coolDownTime * 1000);
 
 			// Ensure job experience is initialized
 			job.exsperience = job.exsperience || 0;

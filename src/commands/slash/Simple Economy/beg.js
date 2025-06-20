@@ -7,6 +7,7 @@ module.exports = {
 	type: 1,
 	coolDownTime: 15 * 60,
 	execute: async (client, interaction, args) => {
+		await client.cooldownDB.set(`cooldown_${module.exports.name}_${interaction.user.id}`, Date.now() + module.exports.coolDownTime * 1000);
 		if (Math.random() < 0.5) {
 			const money = 2 + Math.random() * 3;
 			const wallet = (await moneyDB.get(`wallet_${interaction.user.id}`)) || 0;
