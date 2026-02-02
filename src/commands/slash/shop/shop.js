@@ -151,7 +151,6 @@ module.exports = {
                 return interaction.editReply({ embeds: [embeddedError], components: [] }); 
 			}
 		} catch (err) {
-            console.log("Error in shop interaction:", err);
 			await interaction.editReply({ content: "No selection was made in time, shop closed.", embeds: [], components: [] });
 		}
     },

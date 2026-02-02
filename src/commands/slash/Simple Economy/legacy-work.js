@@ -5,7 +5,7 @@ const tasksDB = new QuickDB({ filePath: "DB/tasks.sqlite" });
 const jobsDB = new QuickDB({ filePath: "DB/workforce.sqlite" });
 
 module.exports = {
-	name: "work",
+	name: "legacy-work",
 	description: "You don't have a j*b, but you can surly find something do to.",
 	type: 1,
 	coolDownTime: 2 * 60 * 60, // 16 hours in seconds

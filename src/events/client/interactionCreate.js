@@ -5,7 +5,6 @@ module.exports = {
 	name: "interactionCreate",
 
 	async execute(interaction, client) {
-		console.log(`[Debug] Interaction type:`, interaction.type, interaction.commandName);
 
 		// Autocomplete support
 		if (interaction.isAutocomplete()) {

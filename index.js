@@ -50,6 +50,7 @@ client.discord = Discord;
 client.commands = new Collection();
 client.slash = new Collection();
 client.config = require("./config");
+client.jobs = require("./jobs").jobs;
 client.shop = require("./shop");
 client.cooldownDB = cooldownDB;
 client.cwd = require("process").cwd(); // require('path').resolve(``);

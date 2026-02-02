@@ -60,7 +60,7 @@ module.exports = {
             extradata: {},
             use: async function (client, interaction, inventory) {
                 interaction.reply({
-                    content: "Why are you using a stealth bomber? You can't even fit it in your inventory.\nYou use it and crash it into the ground, destroying it and everything around you.\n-1 Northrop Grumman B-2 Spirit stealth bomber",
+                    content: "Why are you using a stealth bomber? You can't even fit it in your inventory.\nYou use it and crash it into the ground, destroying it and everything around you.\n-1x Northrop Grumman B-2 Spirit stealth bomber",
                     ephemeral: false
                 });
 
