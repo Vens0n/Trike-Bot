@@ -93,7 +93,7 @@ module.exports = {
 
         /* ---------------- XP SYSTEM ---------------- */
 
-        const xpGain = client.randomInt(15, 25);
+        const xpGain = client.random(15, 25, 2);
         job.xp += xpGain;
 
         const level = client.getLevel(job.xp);
