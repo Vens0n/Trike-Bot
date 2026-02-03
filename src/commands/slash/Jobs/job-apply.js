@@ -45,19 +45,19 @@ module.exports = {
             templocker[userId] = shownJob;
             cooldown = setTimeout(() => { delete templocker[userId]; }, 15000);
         } else {
-            message = "\n\nShowing previous job pull.\nIf you want a new job, please come back later.";
+            message = "Showing previous job pull.\nIf you want a new job, please come back later.";
             shownJob = templocker[userId];
             console.log("Using locked job for user:", userId);
         }
         const embed = new EmbedBuilder()
             .setTitle("📄 Job Applications")
-            .setDescription("Do you want this job? " + (message || ""))
+            .setDescription(`
+                Do you want this job?
+
+                ${shownJob.emoji} ${shownJob.name} (Tier ${shownJob.tier})
+                ${shownJob.description}\n💰 $${shownJob.salary} per shift
+                Risk: ${(shownJob.risk * 100).toFixed(2)}%`)
             .setColor(client.config.embedColor())
-            .addFields({
-                name: `${shownJob.emoji} ${shownJob.name} (Tier ${shownJob.tier})`,
-                value: `${shownJob.description}\n💰 $${shownJob.salary} per shift`,
-                inline: true
-            })
             .setFooter({ text: client.config.embedfooterText, iconURL: client.user.displayAvatarURL() });
 
         const row = new ActionRowBuilder().addComponents(
@@ -73,7 +73,7 @@ module.exports = {
             )
 
         const msg = await interaction.reply({
-            message: message,
+            content: message,
             embeds: [embed],
             components: [row],
             ephemeral: true,
@@ -93,7 +93,7 @@ module.exports = {
                     embeds: [],
                     components: []
                 });
-            } else if (choice.customId !== "apply") {
+            } else if (choice.customId === "apply") {
                 const selected = shownJob;
 
                 const jobData = {

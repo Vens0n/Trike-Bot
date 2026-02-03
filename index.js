@@ -55,6 +55,7 @@ client.shop = require("./shop");
 client.cooldownDB = cooldownDB;
 client.cwd = require("process").cwd(); // require('path').resolve(``);
 client.getLevel = function (xp) {
+	console.log(xp);
 	let level = 1;
 	let xpRequired = xpRequiredForNextLevel(level);
 
@@ -63,7 +64,6 @@ client.getLevel = function (xp) {
 		level++;
 		xpRequired = xpRequiredForNextLevel(level);
 	}
-
 	return level;
 };
 client.random = function (min, max, fix) {
@@ -72,6 +72,7 @@ client.random = function (min, max, fix) {
 function xpRequiredForNextLevel(level) {
 	return 2 * level ** 1.5 + 20 * level + 50;
 }
+
 
 module.exports = client;
 
@@ -84,22 +85,6 @@ client.on("ready", () => {
 });
 
 client.cooldowns = new Map();
-
-client.getLevel = function (xp) {
-	let level = 0;
-	let xpRequired = xpRequiredForNextLevel(level);
-
-	while (xp >= xpRequired) {
-		xp -= xpRequired;
-		level++;
-		xpRequired = xpRequiredForNextLevel(level);
-	}
-
-	return level;
-};
-function xpRequiredForNextLevel(level) {
-	return Math.floor(10 + 5 * level ** 1.3);
-}
 
 // Error Handling
 process.on("uncaughtException", (err) => {

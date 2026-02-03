@@ -3,19 +3,20 @@ const { QuickDB } = require("quick.db");
 
 const moneyDB = new QuickDB({ filePath: "DB/money.sqlite" });
 const jobsDB = new QuickDB({ filePath: "DB/workforce.sqlite" });
-
-const COOLDOWN = 2 * 60 * 60 * 1000; // 2 hours (change later)
+const tasksDB = new QuickDB({ filePath: "DB/tasks.sqlite" });
 
 module.exports = {
     name: "job-work",
     description: "Work your job",
     type: 1,
+    coolDownTime: 2 * 60 * 60,
+    //!           H x MM x SS
 
     execute: async (client, interaction) => {
 
         const userId = interaction.user.id;
 
-        const job = await jobsDB.get(`active_${userId}`);
+        let job = await jobsDB.get(`active_${userId}`);
 
         if (!job) {
             return interaction.reply({
@@ -24,63 +25,176 @@ module.exports = {
             });
         }
 
-        const lastWorked = await jobsDB.get(`cooldown_${userId}`) || 0;
+        
 
-        if (Date.now() < lastWorked) {
-            const remaining = Math.ceil((lastWorked - Date.now()) / 60000);
-            return interaction.reply({
-                content: `⏳ You can work again in **${remaining} minutes**.`,
-                ephemeral: true
-            });
+        /* ---------------- RISK SYSTEM ---------------- */
+
+        // Find risk values from jobs.js
+        const jobsList = client.jobs;
+        job.risk = jobsList[job.tier].find(j => j.id === job.id).risk;
+        job.damage = jobsList[job.tier].find(j => j.id === job.id).damage;
+
+        let damageApplied = false;
+        let damageText = "";
+        let percentLoss = 0;
+        let extraCooldown = 0;
+
+        if (Math.random() < job.risk) {
+            damageApplied = true;
+            damageText = job.damage.message;
+
+            if (job.damage.type === 1) {
+                percentLoss = job.damage.factor;
+            }
+
+            if (job.damage.type === 2) {
+                extraCooldown = job.damage.factor;
+            }
         }
 
-        // XP gain
-        const xpGain = Math.floor(Math.random() * 15) + 10;
+        /* ---------------- REMINDER SYSTEM ---------------- */
+
+        let baseCooldown = Date.now() + module.exports.coolDownTime * 1000;
+
+        if (extraCooldown > 0) {
+            baseCooldown += extraCooldown * 60 * 60 * 1000;
+        }
+        
+        const runAt = baseCooldown;
+
+        await client.config.removeUserTaskIfExists(
+            module.exports.name,
+            "reminder",
+            userId
+        );
+
+        const taskId = `${Date.now()}_${userId}_${Math.floor(Math.random() * 1000)}`;
+
+        const task = {
+            id: taskId,
+            createdAt: Date.now(),
+            source: module.exports.name,
+            type: "reminder",
+            runAt,
+            data: {
+                userId,
+                title: "Looking for cash?",
+                description:
+                    "The economy is yearning for you to step back into action!\n" +
+                    "Use <cmd> to work again and earn money.",
+            },
+        };
+
+        client.emit("newTask", task);
+
+        const tasks = (await tasksDB.get("scheduledTasks")) || [];
+        tasks.push(task);
+        await tasksDB.set("scheduledTasks", tasks);
+
+        /* ---------------- XP SYSTEM ---------------- */
+
+        const xpGain = client.randomInt(15, 25);
         job.xp += xpGain;
 
-        // Level formula (simple)
-        const level = Math.floor(job.xp / 100);
+        const level = client.getLevel(job.xp);
 
-        // Bonus scales with level
+        /* ---------------- PAY CALCULATION ---------------- */
+
         const bonus = level * (Math.random() * 10 + 5);
 
-        const total = job.salary + bonus;
+        let total = job.salary + bonus;
 
-        // Update money
+        let lossAmount = 0;
+
+        if (damageApplied && percentLoss > 0) {
+            lossAmount = total * percentLoss;
+            total -= lossAmount;
+        }
+
+        total = Math.max(0, total);
+        total = Number(total.toFixed(2));
+        lossAmount = Number(lossAmount.toFixed(2));
+
+        /* ---------------- COOLDOWN ---------------- */
+
+        await client.cooldownDB.set(
+            `cooldown_${module.exports.name}_${userId}`,
+            baseCooldown
+        );
+
+        /* ---------------- MONEY UPDATE ---------------- */
+
         const walletKey = `wallet_${userId}`;
         const wallet = (await moneyDB.get(walletKey)) || 0;
+
         await moneyDB.set(walletKey, wallet + total);
 
-        // Update job stats
+        /* ---------------- JOB STATS ---------------- */
+
         job.timesWorked++;
         job.moneyEarned += total;
 
         await jobsDB.set(`active_${userId}`, job);
-        await jobsDB.set(`cooldown_${userId}`, Date.now() + COOLDOWN);
 
-        // OPTIONAL: tier unlock hook
-        /*
-        if (level >= 5) {
-            const tier = (await jobsDB.get(`tier_${userId}`)) ?? 0;
-            await jobsDB.set(`tier_${userId}`, tier + 1);
+        /* ---------------- EMBED OUTPUT ---------------- */
+
+        let riskSection = "";
+
+        if (damageApplied) {
+            if (percentLoss > 0) {
+                riskSection =
+                    `⚠️ **Risk Event!**\n` +
+                    `${damageText}\n` +
+                    `You lost **$${lossAmount}** (${percentLoss * 100}%)\n\n`;
+            }
+
+            if (extraCooldown > 0) {
+                riskSection =
+                    `⚠️ **Risk Event!**\n` +
+                    `${damageText}\n` +
+                    `Extra cooldown added: **${extraCooldown} hours**\n\n`;
+            }
         }
-        */
 
         const embed = new EmbedBuilder()
-            .setColor(client.config.embedColor())
+            .setColor(damageApplied ? 0xff5c5c : client.config.embedColor())
             .setTitle(`${job.emoji} Work Shift Complete`)
             .setDescription(
+                riskSection +
                 `You worked as a **${job.name}**\n\n` +
                 `💵 Base Pay: $${job.salary.toFixed(2)}\n` +
-                `⭐ Bonus: $${bonus.toFixed(2)}\n` +
-                `➡️ Total: **$${total.toFixed(2)}**\n\n` +
-                `📈 XP Gained: ${xpGain}\n` +
-                `🏆 Level: ${level}`
+                `✨ Bonus: $${bonus.toFixed(2)}\n` +
+                `💰 Total Earned: **$${total.toFixed(2)}**\n\n` +
+                `📈 XP Gained: +${xpGain}\n` +
+                `⭐ Total XP: ${job.xp}\n` +
+                `🏅 Level: ${level}`
             )
             .setFooter({
-                text: `Total earned at this job: $${job.moneyEarned.toFixed(2)}`
+                text: client.config.embedfooterText,
+                iconURL: client.user.displayAvatarURL()
             });
 
         await interaction.reply({ embeds: [embed] });
+
+        /* ---------------- TIER UNLOCK ---------------- */
+
+        if (level >= 10) {
+
+            const activejob = await jobsDB.get(`active_${userId}`);
+
+            if (activejob.levelten !== true) {
+
+                const tier = (await jobsDB.get(`tier_${userId}`)) ?? 0;
+
+                await jobsDB.set(`tier_${userId}`, tier + 1);
+                await jobsDB.set(`active_${userId}`, { ...activejob, levelten: true });
+
+                await interaction.followUp({
+                    content: `🎉 You reached Level ${level} and unlocked **Tier ${tier + 1} jobs!**`,
+                    ephemeral: true
+                });
+            }
+        }
+
     }
 };

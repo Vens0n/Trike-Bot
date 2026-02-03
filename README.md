@@ -30,23 +30,21 @@
 
 ### To do
 - /work
-    - [ ] Work your job
-    - [ ] Start cooldown
-    - [ ] Start reminder
-    - [ ] Slowly level up active job
-    - [ ] Get small bonus's the move you work
+    - [x] Work your job
+    - [x] Start cooldown
+    - [x] Start reminder
+    - [x] Slowly level up active job
+    - [x] Get small bonus's the more you work
 - /job status
-    - [ ] Show stats of your job
-    - [ ] Cooldown, start date, money accumulated, rank, times worked
+    - [x] Show stats of your job
+    - [x] Cooldown, start date, money accumulated, rank, times worked
 - /job apply
-    - [ ] apply for a new job
-    - [ ] can only run if unemployed
-    - [ ] browse based off teirs. teir 0 is teir 0 and teir 2 is teir 0, 1, and 2.
+    - [x] apply for a new job
+    - [x] can only run if unemployed
+    - [x] browse based off teirs. teir 0 is teir 0 and teir 2 is teir 0, 1, and 2.
 - /job quit
     - [ ] loose your job
-    - [ ] job teir stays
+    - [ ] job their stays
     - [ ] job level goes away
 - /job work
-    - [ ] same a /work
-- /job history
-    - [ ] same at job status, but for all jobs ever
+    - [x] same a /work

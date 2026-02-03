@@ -36,7 +36,6 @@ module.exports = {
 				const userKey = `cooldown_${command.name}_${interaction.user.id}`;
 				const now = Date.now();
 				const cooldownUntil = await cooldownDB.get(userKey);
-				console.log(`[Debug] Cooldown for ${command.name} by ${interaction.user.id}:`, cooldownUntil, now);
 				if (cooldownUntil && cooldownUntil > now) {
 					return interaction.reply({
 						content: `⏳ You're on cooldown! Try again <t:${(cooldownUntil / 1000).toFixed(0)}:R> .`,
