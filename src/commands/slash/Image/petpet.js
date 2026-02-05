@@ -11,20 +11,48 @@ module.exports = {
     options: [
         {
             name: "user",
-            description: "The user to petpet.",
+            description: "Use a user's avatar.",
             type: ApplicationCommandOptionType.User,
-            required: true,
+            required: false,
         },
+        {    
+            name: "url",
+            description: "Or provide an image URL.",
+            type: ApplicationCommandOptionType.String,
+            required: false,
+        },
+        {
+            name: "attachment",
+            description: "Or upload an image.",
+            type: ApplicationCommandOptionType.Attachment,
+            required: false,
+        }
     ],
 
     execute: async (client, interaction, args) => {
-        const user = interaction.options.getUser("user");
+        const user = interaction.options.getUser("user") || null;
+        const url = interaction.options.getString("url") || null;
+        const attachment = interaction.options.getAttachment("attachment") || null;
 
-        const pfpurl = user.displayAvatarURL({ extension: 'png', size: 128 })
+        let pfpurl = null;
+        let message = null;
+
+        if (attachment) {
+            pfpurl = attachment.url;
+        } else if (url) {
+            pfpurl = url;
+        } else if (user) {
+            message = `Petpetting ${user}'s avatar...`
+            pfpurl = user.displayAvatarURL({ extension: 'png', size: 512 });
+
+        } else {
+            return interaction.reply({ content: "Please provide a user, URL, or attachment to use for the image.", ephemeral: true });
+        }
+
         const petpetGif = await petpet(pfpurl)
 
         interaction.reply({
-            content: `Petpetting ${user}'s avatar...`,
+            content: message,
             files: [{
                 attachment: petpetGif,
                 name: "petpet.gif"
