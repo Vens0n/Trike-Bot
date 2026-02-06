@@ -33,13 +33,16 @@ module.exports = {
             cdText = `<t:${(cooldown / 1000).toFixed(0)}:R>`;
         }
 
+        const jobsList = client.jobs;
+        job.risk = jobsList[job.tier].find(j => j.id === job.id).risk;
+
         const embed = new EmbedBuilder()
             .setColor(client.config.embedColor())
             .setTitle(`${job.emoji} ${job.name} — Status`)
             .addFields(
                 { name: "Tier", value: `${tier}`, inline: true },
-                { name: "Level", value: `${client.getLevel(xp)}`, inline: true },
-                { name: "XP", value: `${xp}`, inline: true },
+                { name: "Level", value: `${client.getLevel(xp)} (${xp.toFixed(0)} XP)`, inline: true },
+                { name: "Risk", value: `${(job.risk * 100).toFixed(1)}%`, inline: true },
                 
                 { name: "Times Worked", value: `${job.timesWorked}`, inline: true },
                 { name: "Money Earned", value: `$${job.moneyEarned.toFixed(2)}`, inline: true },

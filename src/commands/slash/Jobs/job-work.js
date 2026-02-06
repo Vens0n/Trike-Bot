@@ -60,7 +60,7 @@ module.exports = {
             baseCooldown += extraCooldown * 60 * 60 * 1000;
         }
         
-        const runAt = baseCooldown;
+        const runAt = baseCooldown + (12 * 60 * 60 * 1000); // 12 hours after cooldown ends
 
         await client.config.removeUserTaskIfExists(
             module.exports.name,
@@ -78,9 +78,9 @@ module.exports = {
             runAt,
             data: {
                 userId,
-                title: "Looking for cash?",
+                title: "Boss is getting angry!",
                 description:
-                    "The economy is yearning for you to step back into action!\n" +
+                    "You don't want to piss of your boss, do you?\n" +
                     "Use <cmd> to work again and earn money.",
             },
         };
@@ -166,7 +166,7 @@ module.exports = {
                 `✨ Bonus: $${bonus.toFixed(2)}\n` +
                 `💰 Total Earned: **$${total.toFixed(2)}**\n\n` +
                 `📈 XP Gained: +${xpGain}\n` +
-                `⭐ Total XP: ${job.xp}\n` +
+                `⭐ Total XP: ${job.xp.toFixed(0)}\n` +
                 `🏅 Level: ${level}`
             )
             .setFooter({

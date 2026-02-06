@@ -32,6 +32,7 @@ module.exports = {
     ],
 
     execute: async (client, interaction, args) => {
+        return interaction.reply({ content: "This command has been disabled temporarily.", ephemeral: true });
         const user = interaction.options.getUser("user") || null;
         const url = interaction.options.getString("url") || null;
         const attachment = interaction.options.getAttachment("attachment") || null;
