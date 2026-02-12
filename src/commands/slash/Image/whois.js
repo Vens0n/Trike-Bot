@@ -5,11 +5,9 @@ const path = require('path')
 const fs = require('fs')
 
 module.exports = {
-    name: "image-worsethanepstein",
-    description: "Make a meme 'Is [user] Worse than Epstein!?'.",
+    name: "image-whatdoesheevendo",
+    description: "Make a meme 'What does [user] even do?'.",
     type: 1,
-    coolDownTime: 1 * 60 * 60, // 1 Hour
-    //!           H x MM x SS
     options: [
         {
             name: "user",
@@ -32,7 +30,6 @@ module.exports = {
     ],
 
     execute: async (client, interaction, args) => {
-        return interaction.reply({ content: "This command has been disabled temporarily.", ephemeral: true });
         const user = interaction.options.getUser("user") || null;
         const url = interaction.options.getString("url") || null;
         const attachment = interaction.options.getAttachment("attachment") || null;
@@ -46,38 +43,38 @@ module.exports = {
         } else if (url) {
             pfpurl = url;
         } else if (user) {
-            if (user.id == 638368326996983848) return interaction.reply({ content: "fuck you lmao", ephemeral: true });
-            message = `Is ${user} Worse than Epstein!?`
+            message = `What does ${user} even **do**?`
             username = user.displayName || user.username;
             pfpurl = user.displayAvatarURL({ extension: 'png', size: 512 });
 
         } else {
             return interaction.reply({ content: "Please provide a user, URL, or attachment to use for the image.", ephemeral: true });
         }
-        let worsethanGif;
+        let whatdoesGif;
         try {
-            worsethanGif = await worsethanepstein(pfpurl, username)
+            whatdoesGif = await whatdooesheevendo(pfpurl, username)
         } catch (error) {
+            console.error("Error generating image:", error);
             return interaction.reply({ content: "An error occurred while generating the image.", ephemeral: true });
         }
-		await client.cooldownDB.set(`cooldown_${module.exports.name}_${interaction.user.id}`, Date.now() + module.exports.coolDownTime * 1000);
+        await client.cooldownDB.set(`cooldown_${module.exports.name}_${interaction.user.id}`, Date.now() + module.exports.coolDownTime * 1000);
 
         interaction.reply({
             content: message,
             files: [{
-                attachment: worsethanGif,
-                name: "worsethanepstein.gif"
+                attachment: whatdoesGif,
+                name: "whatdooesheevendo.gif"
             }]
         });
         
     },
 };
 
-async function worsethanepstein(userpfpurl, username) {
+async function whatdooesheevendo(pfpurl) {
 
-    const bottomimage = await Canvas.loadImage(path.resolve(__dirname, "./data/worsethanepstein/bottom.png"))
-    const topimage = await Canvas.loadImage(path.resolve(__dirname, "./data/worsethanepstein/top.png"))
-    const leftimage = await Canvas.loadImage(userpfpurl)
+    const bottomimage = await Canvas.loadImage(path.resolve(__dirname, "./data/whatdoes/bottom.png"))
+    const topimage = await Canvas.loadImage(path.resolve(__dirname, "./data/whatdoes/top.png"))
+    const leftimage = await Canvas.loadImage(pfpurl)
 
     // Main canvas
     const canvas = Canvas.createCanvas(
@@ -99,54 +96,17 @@ async function worsethanepstein(userpfpurl, username) {
 
     leftCtx.drawImage(leftimage, 0, 0)
 
-    // Grayscale
-    const imgData = leftCtx.getImageData(
-        0,
-        0,
-        leftCanvas.width,
-        leftCanvas.height
-    )
 
-    const amount = 0.7
-    for (let i = 0; i < imgData.data.length; i += 4) {
-
-        const r = imgData.data[i]
-        const g = imgData.data[i + 1]
-        const b = imgData.data[i + 2]
-
-        const gray = (r + g + b) / 3
-
-        imgData.data[i] = r * (1 - amount) + gray * amount
-        imgData.data[i + 1] = g * (1 - amount) + gray * amount
-        imgData.data[i + 2] = b * (1 - amount) + gray * amount
-    }
-
-    leftCtx.putImageData(imgData, 0, 0)
-
-    // ----- Rotate without clipping -----
-
-    const maxSide = Math.max(leftCanvas.width, leftCanvas.height)
-    const diag = Math.sqrt(maxSide * maxSide * 2)
-
-    const rotatedCanvas = Canvas.createCanvas(diag, diag)
-    const rotatedCtx = rotatedCanvas.getContext('2d')
-
-    rotatedCtx.translate(diag / 2, diag / 2)
-    rotatedCtx.rotate(-2 * Math.PI / 180)
-
-    rotatedCtx.drawImage(
-        leftCanvas,
-        -leftCanvas.width / 2,
-        -leftCanvas.height / 2
-    )
     // ----- Composite onto main canvas -----
 
-    const drawSize = bottomimage.height + 120
+    const padding = 0
+
+    const drawSize = bottomimage.height - 2 * padding
 
     ctx.drawImage(
-        rotatedCanvas,
-        -80,
-        -50,
+        leftCtx.canvas,
+        bottomimage.width - drawSize - padding,
+        padding,
         drawSize,
         drawSize
     )
